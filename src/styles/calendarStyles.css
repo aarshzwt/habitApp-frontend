@@ -1,0 +1,99 @@
+.react-calendar {
+    background: #f9fafb;
+    border-radius: 1rem;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    color: #1f2937;
+}
+
+/* Weekday names */
+.react-calendar__month-view__weekdays {
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+/* Navigation header */
+.react-calendar__navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.react-calendar__navigation button {
+    background: transparent;
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 1rem;
+    transition: color 0.2s ease;
+}
+
+.react-calendar__navigation button:hover {
+    color: #2563eb;
+}
+
+/* Day tiles */
+.react-calendar__tile {
+    padding: 0.75rem 0.5rem;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease-in-out;
+    margin: 0.2rem 0.2rem;
+}
+
+.react-calendar__tile:hover {
+    background: #e0f2fe !important;
+    color: #0c4a6e !important;
+}
+
+
+/* Active/current day */
+.react-calendar__tile--now {
+    background: #c7d2fe !important;
+    color: #1e3a8a !important;
+    font-weight: bold;
+}
+
+/* Selected date */
+.react-calendar__tile--active {
+    background: #dbeafe !important;
+    color: #1d4ed8 !important;
+}
+
+/* Log status colors */
+.bg-green-100 {
+    background-color: #d1fae5 !important;
+    color: #065f46 !important;
+}
+
+.bg-green-100:hover {
+    background-color: #9af3c5 !important;
+    color: #013325 !important;
+}
+
+.bg-red-100 {
+    background-color: #fee2e2 !important;
+    color: #991b1b !important;
+}
+
+.bg-red-100:hover {
+    background-color: #f8c3c3f3 !important;
+    color: #860f0f !important;
+}
+
+.bg-yellow-100 {
+    background-color: #fef3c7 !important;
+    color: #92400e !important;
+}
+
+.bg-yellow-100:hover {
+    background-color: #fdeba4 !important;
+    color: #77340b !important;
+}
+
+.bg-gray-50 {
+    background-color: #f9fafb !important;
+    color: #1f2937 !important;
+}
