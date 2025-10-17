@@ -4,9 +4,12 @@ import { useEffect, useState } from "react";
 export function ChallengeLogs({ challengeId }) {
     const [logs, setLogs] = useState([]);
 
-    // SEPARATE USER'S OWN AND OTHER PARTICIPANTS LOG AND SET THE CALENDAR COMPONENT
     useEffect(() => {
-        axiosInstance.get(`/challengeLogs/${challengeId}`).then(res => setLogs(res.logs));
+        const getLogs = async () => {
+            const res = await axiosInstance.get(`/challengeLogs/${challengeId}`)
+            setLogs(res.logs)
+        }
+        getLogs();
     }, [challengeId]);
 
     const markLog = (status: "completed" | "missed" | "remaining") => {

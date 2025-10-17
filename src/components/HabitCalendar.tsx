@@ -1,7 +1,6 @@
-
 import Calendar from "react-calendar";
 import 'react-calendar/dist/Calendar.css';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import axiosInstance from "@/utils/axiosInstance";
 import toast from "react-hot-toast";
 
@@ -20,63 +19,74 @@ interface HabitCalendarProps {
 
 export default function HabitCalendar({ allLogs, startDate, endDate, onChange }: HabitCalendarProps) {
     const [date, setDate] = useState<Date>(new Date());
-    const [monthLogs, setMonthLogs] = useState<Log[]>([]);
     const [openIndex, setOpenIndex] = useState<number | null>(null);
     const [selectedLog, setSelectedLog] = useState<Log | null>(null);
 
-    useEffect(() => {
+    // Memoize month logs so we only recalc when date or allLogs changes
+    const monthLogs = useMemo(() => {
         const currentMonth = date.getMonth();
         const currentYear = date.getFullYear();
 
-        const filtered = allLogs.filter((log: Log) => {
+        return allLogs.filter((log: Log) => {
             const logDate = new Date(log.date);
-            return (
-                logDate.getMonth() === currentMonth &&
-                logDate.getFullYear() === currentYear
-            );
+            return logDate.getMonth() === currentMonth && logDate.getFullYear() === currentYear;
         });
-
-        setMonthLogs(filtered);
     }, [date, allLogs]);
 
-    function getTileClass({ date, view }: { date: Date; view: string }): string {
-        if (view !== "month") return "";
+    // Memoized tile class function
+    const getTileClass = useCallback(
+        ({ date: tileDate, view }: { date: Date; view: string }) => {
+            if (view !== "month") return "";
 
-        const log = monthLogs.find(
-            (log) => new Date(log.date).toDateString() === date.toDateString()
-        );
+            const log = monthLogs.find(
+                (log) => new Date(log.date).toDateString() === tileDate.toDateString()
+            );
 
-        if (!log) return "bg-gray-50 text-gray-800";
-        if (log.status === "completed") return "bg-green-100 text-green-800";
-        if (log.status === "missed") return "bg-red-100 text-red-800";
-        if (log.status === "remaining") return "bg-yellow-100 text-yellow-800";
-        return "";
-    }
+            if (!log) return "bg-gray-50 text-gray-800";
+            if (log.status === "completed") return "bg-green-100 text-green-800";
+            if (log.status === "missed") return "bg-red-100 text-red-800";
+            if (log.status === "remaining") return "bg-yellow-100 text-yellow-800";
+            return "";
+        },
+        [monthLogs]
+    );
 
-    function dayClicked(selectedDate: Date) {
-        const log = monthLogs.find(
-            (log) => new Date(log.date).toDateString() === selectedDate.toDateString()
-        );
-        if (log) {
-            setSelectedLog(log)
-            setOpenIndex(log.id);
-        }
-    }
-    const updateHabitStatus = async (logId: number, status: "completed" | "missed" | "remaining"): Promise<void> => {
-        try {
-            await axiosInstance.patch(`/habitLog/${logId}`, { status });
-            onChange();
-            // setSelectedLog(prev => prev ? { ...prev, status } : prev);
-            // setHabits(prev =>
-            //     prev.map(habit =>
-            //         habit.log_id === logId ? { ...habit, status: nextStatus as Habit['status'] } : habit
-            //     )
-            // );
-        } catch (error) {
-            toast.error('Failed to update status');
-            console.error(error);
-        }
-    };
+    // Memoized day click handler
+    const dayClicked = useCallback(
+        (selectedDate: Date) => {
+            const log = monthLogs.find(
+                (log) => new Date(log.date).toDateString() === selectedDate.toDateString()
+            );
+            if (log) {
+                setSelectedLog(log);
+                setOpenIndex(log.id);
+            }
+        },
+        [monthLogs]
+    );
+
+    const updateHabitStatus = useCallback(
+        async (logId: number, status: "completed" | "missed" | "remaining") => {
+            try {
+                await axiosInstance.patch(`/habitLog/${logId}`, { status });
+                onChange();
+            } catch (error) {
+                toast.error('Failed to update status');
+                console.error(error);
+            }
+        },
+        [onChange]
+    );
+
+    // Memoized filtered logs for button eligibility
+    const isEditable = useMemo(
+        () =>
+            selectedLog
+                ? new Date().setDate(new Date().getDate() - 7) <= new Date(selectedLog.date) &&
+                new Date(selectedLog.date) <= new Date()
+                : false,
+        [selectedLog]
+    );
 
     return (
         <>
@@ -87,7 +97,7 @@ export default function HabitCalendar({ allLogs, startDate, endDate, onChange }:
 
                 <div className="flex justify-center">
                     <Calendar
-                        onClickDay={(date) => dayClicked(date)}
+                        onClickDay={dayClicked}
                         value={date}
                         onActiveStartDateChange={({ activeStartDate }) => setDate(activeStartDate ?? new Date())}
                         tileClassName={getTileClass}
@@ -103,58 +113,54 @@ export default function HabitCalendar({ allLogs, startDate, endDate, onChange }:
                     />
                 </div>
             </div>
+
             {openIndex !== null && selectedLog && (
-                <>
+                <div
+                    className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+                    onClick={() => setOpenIndex(null)}
+                >
                     <div
-                        className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-                        onClick={() => setOpenIndex(null)}
+                        className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
+                        onClick={(e) => e.stopPropagation()}
                     >
-                        <div
-                            className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <h2 className="text-xl font-bold mb-4">Log Details</h2>
-                            <div>
-                                <p><strong>Date:</strong> {selectedLog?.date}</p>
-                                <p><strong>Status:</strong> {selectedLog?.status}</p>
-                            </div>
-
-                            {/* Status change button */}
-                            {/* user can now change log status of the past 1 week only */}
-                            {new Date().setDate(new Date().getDate() - 7) <= new Date(selectedLog.date) &&
-                                new Date(selectedLog.date) <= new Date() && (
-                                    <div className="mt-4">
-                                        <button className={`px-4 py-2 rounded-lg font-semibold transition
-                                        ${selectedLog.status === "completed" ? "bg-green-500 text-white" :
-                                                selectedLog.status === "missed" ? "bg-red-500 text-white" :
-                                                    "bg-gray-300 text-black"}
-                                        `}
-                                            onClick={() => {
-                                                let nextStatus: "completed" | "missed" | "remaining" =
-                                                    selectedLog.status === "remaining"
-                                                        ? "completed"
-                                                        : selectedLog.status === "completed"
-                                                            ? "missed"
-                                                            : "remaining";
-
-                                                updateHabitStatus(selectedLog.id, nextStatus);
-                                            }}
-                                        >
-                                            {selectedLog.status === "completed"
-                                                ? "✅ Completed"
-                                                : selectedLog.status === "missed"
-                                                    ? "⏭️ Missed"
-                                                    : "⏳ Remaining"}
-                                        </button>
-                                    </div>
-                                )}
+                        <h2 className="text-xl font-bold mb-4">Log Details</h2>
+                        <div>
+                            <p><strong>Date:</strong> {selectedLog.date}</p>
+                            <p><strong>Status:</strong> {selectedLog.status}</p>
                         </div>
-                    </div>
-                </>
-            )}
 
+                        {isEditable && (
+                            <div className="mt-4">
+                                <button
+                                    className={`px-4 py-2 rounded-lg font-semibold transition
+                                        ${selectedLog.status === "completed"
+                                            ? "bg-green-500 text-white"
+                                            : selectedLog.status === "missed"
+                                                ? "bg-red-500 text-white"
+                                                : "bg-gray-300 text-black"
+                                        }`}
+                                    onClick={() => {
+                                        const nextStatus: "completed" | "missed" | "remaining" =
+                                            selectedLog.status === "remaining"
+                                                ? "completed"
+                                                : selectedLog.status === "completed"
+                                                    ? "missed"
+                                                    : "remaining";
+
+                                        updateHabitStatus(selectedLog.id, nextStatus);
+                                    }}
+                                >
+                                    {selectedLog.status === "completed"
+                                        ? "✅ Completed"
+                                        : selectedLog.status === "missed"
+                                            ? "⏭️ Missed"
+                                            : "⏳ Remaining"}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </>
     );
 }
-
-

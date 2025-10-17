@@ -25,10 +25,6 @@ export function ChallengeDetails({ id }) {
       <div className="mt-6">
         <Participants challengeId={id} />
       </div>
-
-      <div className="mt-6">
-        <ChallengeLogs challengeId={id} />
-      </div>
     </div>
   );
 }

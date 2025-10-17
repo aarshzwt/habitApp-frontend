@@ -11,7 +11,7 @@ export function ChallengeActions({ challengeId, joined, duration, status }) {
     axiosInstance.delete(`/challenges/leave/${challengeId}`).then(() => location.reload());
 
   // Show stats for past challenges
-  if (status !== "active") {
+  if (joined && status !== "active") {
     return (
       <button
         onClick={(e) => {
