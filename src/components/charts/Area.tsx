@@ -9,6 +9,7 @@ interface AreaChartProps {
   yAxisLabel?: string;
   xAxisLabel?: string;
   colors?: string[];
+  visiblePoints?: number;
 }
 
 export default function Area({
@@ -18,6 +19,7 @@ export default function Area({
   yAxisLabel = "Value",
   xAxisLabel = "Category",
   colors = ["#0090FF"],
+  visiblePoints = 15,
 }: AreaChartProps) {
   const series = [{
     name: seriesName,
@@ -28,8 +30,21 @@ export default function Area({
     chart: {
       type: 'area',
       height: 350,
-      zoom: { enabled: false },
-      toolbar: { show: false }
+       zoom: {
+        enabled: true,
+        type: "x",
+        autoScaleYaxis: true,
+      },
+      toolbar: {
+        show: true,
+        tools: {
+          zoom: true,
+          zoomin: true,
+          zoomout: true,
+          pan: true,
+          reset: true,
+        },
+      },
     },
     dataLabels: {
       enabled: false
@@ -41,7 +56,12 @@ export default function Area({
     xaxis: {
       categories,
       title: { text: xAxisLabel },
-      labels: { rotate: -45 }
+       labels: {
+        rotate: -45,
+        hideOverlappingLabels: true,
+        trim: true,
+      },
+      tickAmount: visiblePoints,
     },
     yaxis: {
       title: { text: yAxisLabel }
@@ -63,7 +83,21 @@ export default function Area({
     colors
   };
 
-  return (
-    <Chart options={options} series={series} type="area" height={350} />
-  );
+   // Optional: Restrict initial visible range
+  const end = Math.min(visiblePoints, data.length);
+  console.log(data.length, end)
+  const start = 0;
+  const optionsWithZoom = {
+    ...options,
+    chart: {
+      ...options.chart,
+      events: {
+        mounted: (chart:any) => {
+          chart.zoomX(start, end - 1);
+        },
+      },
+    },
+  };
+
+  return <Chart options={optionsWithZoom} series={series} type="area" height={350} />;
 }
