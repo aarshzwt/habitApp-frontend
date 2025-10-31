@@ -2,7 +2,9 @@
 
 import AllHabits from "@/components/Home/AllHabits";
 import Badges from "@/components/Home/Badges";
+import DueToday from "@/components/Home/DueToday";
 import Header from "@/components/Home/Header";
+import HomeChallengesSection from "@/components/Home/HomeChallengesSection";
 import Progress from "@/components/Home/Progress";
 import TodayHabits from "@/components/Home/TodayHabits";
 import TemplateList from "@/components/TemplateList";
@@ -47,8 +49,12 @@ export default function HomePage() {
     <div className="min-h-screen bg-gray-50 text-gray-800 p-4 sm:p-8">
       {user && <Header user={user} />}
 
+      <section>
+        <DueToday />
+        {/* <TodayHabits onStatusUpdated={getUserDetails} /> */}
+      </section>
       <section className="mb-8">
-        <TodayHabits onStatusUpdated={getUserDetails} />
+        <HomeChallengesSection />
       </section>
 
       <section className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -57,9 +63,9 @@ export default function HomePage() {
         <TemplateList />
       </section>
 
-      <section>
+      {/* <section>
         <AllHabits />
-      </section>
+      </section> */}
     </div>
   );
 }

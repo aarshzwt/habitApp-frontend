@@ -19,7 +19,12 @@ export default function AllHabits() {
   const [isDeleted, setIsDeleted] = useState<boolean>(false)
   const fetchHabits = async () => {
     try {
-      const res = await axiosInstance.get("/habit/user");
+      const res = await axiosInstance.get("/habit/user", {
+        params: {
+          page: 1,
+          limit: 5,
+        }
+      });
       setHabits(res.habits);
     } catch (err) {
       console.error("Failed to fetch habits:", err);

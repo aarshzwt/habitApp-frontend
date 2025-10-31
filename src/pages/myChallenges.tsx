@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { ChallengeCard } from "@/components/challenges/challengeCard";
 import axiosInstance from "@/utils/axiosInstance";
+import { useRouter } from "next/router";
 
 export default function MyChallengesPage() {
+    const router = useRouter();
+
     const [myChallenges, setMyChallenges] = useState([]);
 
     useEffect(() => {
@@ -13,8 +16,17 @@ export default function MyChallengesPage() {
     const pastChallenges = myChallenges.filter(ch => ch.status !== "active");
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
-            <h1 className="text-2xl font-bold text-indigo-600 mb-4">My Challenges</h1>
+         <div className="max-w-4xl mx-auto p-6">
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">🏆 My Challenges</h2>
+
+                <button
+                    onClick={() => router.push("/challenge")}
+                    className="text-blue-600 font-medium hover:underline"
+                >
+                    Explore More →
+                </button>
+            </div>
 
             {/* Active Challenges */}
             {activeChallenges.map(ch => (
