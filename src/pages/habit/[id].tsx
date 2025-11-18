@@ -5,6 +5,7 @@ import axiosInstance from "@/utils/axiosInstance";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import HabitCalendar from "@/components/HabitCalendar";
+import ChangeEndDateModal from "@/components/Models/ChangeEndDateModal";
 
 type Habit = {
     id: number;
@@ -42,6 +43,7 @@ export default function HabitDetail() {
     const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>("");
+    const [openModal, setOpenModal] = useState(false)
 
     const weekDays = [
         { label: "Sun", value: 0 },
@@ -62,7 +64,7 @@ export default function HabitDetail() {
         try {
             setLoading(true);
             const res = await axiosInstance.get(`/habit/${id}`);
-            console.log(res);
+
             setHabit(res.habit);
             setLogs(res.logs);
             setStats(res.stats);
@@ -101,8 +103,13 @@ export default function HabitDetail() {
                     <p className="text-gray-600 mt-2">{habit.description}</p>
                     <div className="mt-4 flex flex-wrap gap-3 text-sm text-gray-700">
                         <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
-                            Frequency: {habit.frequency_type === "daily" ? "Daily" : habit.frequency_type === "every_x_days" ? `every ${habit.frequency_value} days` : `${habit.frequency_value}x / week`}
+                            Frequency: {habit.frequency_type === "daily"
+                                ? "Daily"
+                                : habit.frequency_type === "every_x_days"
+                                    ? `every ${habit.frequency_value} days`
+                                    : `${habit.frequency_value}x / week`}
                         </span>
+
                         {habit.frequency_days && (
                             <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full">
                                 Repeat Days:{" "}
@@ -118,13 +125,30 @@ export default function HabitDetail() {
                         <span className="bg-purple-50 text-purple-700 px-3 py-1 rounded-full">
                             End: {habit.end_date || "Ongoing"}
                         </span>
+
+                        <button
+                            onClick={() => setOpenModal(true)}
+                            className="bg-blue-600 text-white px-3 py-2 rounded-md"
+                        >
+                            Change End Date
+                        </button>
+
+                        <ChangeEndDateModal
+                            isOpen={openModal}
+                            onClose={() => setOpenModal(false)}
+                            habit={habit}
+                            onSuccess={getDetails}
+                        />
                     </div>
+
                 </div>
 
-                <div className="flex gap-10">
+                <div className="flex justify-around">
                     {/* Logs */}
                     {logs && habit && (
-                        <HabitCalendar allLogs={logs} startDate={habit.start_date} endDate={habit.end_date ?? null} onChange={getDetails} />
+                        // <div className="bg-white shadow-md rounded-2xl p-6 border border-gray-100 w-1/2">
+                        <HabitCalendar allLogs={logs} startDate={habit.start_date} endDate={habit.end_date ?? null} onChange={getDetails} type="habit" />
+                        // </div>
                     )}
 
                     {/* Stats */}

@@ -1,7 +1,6 @@
 // components/TodayHabits.js
 import { useEffect, useState } from 'react';
 import axiosInstance from '@/utils/axiosInstance';
-import toast from 'react-hot-toast';
 import { useRouter } from 'next/router';
 
 const STATUS_COLORS = {
@@ -35,8 +34,6 @@ export default function TodayHabits({ onStatusUpdated }: TodayHabitsProps) {
             const res = await axiosInstance.get('/habitLog/today');
             setHabits(res.habit);
         } catch (error) {
-            toast.error("Couldn't load today's habits");
-            console.error(error);
         }
     };
 
@@ -50,8 +47,6 @@ export default function TodayHabits({ onStatusUpdated }: TodayHabitsProps) {
                 )
             );
         } catch (error) {
-            toast.error('Failed to update status');
-            console.error(error);
         }
     };
 

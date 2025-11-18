@@ -1,48 +1,8 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import AddHabitModal from "./Models/AddHabitModal";
-
-// Generate random shape SVG placeholder
-const generateShapesSVG = (size = 300, seed: number | null = null) => {
-    const colors = ["#FF6B6B", "#6BCB77", "#4D96FF", "#FFD93D", "#C77DFF"];
-    const shapes = [];
-    const numShapes = 5;
-
-    let rand = Math.random;
-    if (seed) {
-        let s = seed.toString().split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-        rand = () => {
-            s = Math.sin(s) * 10000;
-            return s - Math.floor(s);
-        };
-    }
-
-    for (let i = 0; i < numShapes; i++) {
-        const color = colors[Math.floor(rand() * colors.length)];
-        const x = rand() * size;
-        const y = rand() * size;
-        const shapeType = rand();
-
-        if (shapeType < 0.33) {
-            shapes.push(`<circle cx="${x}" cy="${y}" r="${rand() * 30 + 10}" fill="${color}" />`);
-        } else if (shapeType < 0.66) {
-            shapes.push(`<rect x="${x}" y="${y}" width="${rand() * 30 + 10}" height="${rand() * 30 + 10}" fill="${color}" />`);
-        } else {
-            shapes.push(`<polygon points="${x},${y} ${x + 20},${y + 40} ${x - 20},${y + 40}" fill="${color}" />`);
-        }
-    }
-
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" style="background:#f8f9fa">${shapes.join("")}</svg>`;
-    return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-};
-
-interface TemplatesType {
-    id: number;
-    categoryImage: string;
-    categoryName: string;
-    description: string;
-    title: string;
-}
+import { TemplatesType } from "./types";
+import { generateShapesSVG } from "@/utils";
 
 export default function TemplateList() {
 
@@ -55,7 +15,9 @@ export default function TemplateList() {
 
     const fetchTemplates = async () => {
         try {
-            const res = await axiosInstance.post(`/templates`, { limit, offset });
+            const res = await axiosInstance.get(`/templates`, {
+                params: { limit, offset }
+            });
             if (res.total < limit) setHasMore(false);
             setTemplates(res.templates);
         } catch (err) {
@@ -115,7 +77,7 @@ export default function TemplateList() {
                 <AddHabitModal
                     isOpen={habitModalOpen}
                     onClose={() => setHabitModalOpen(false)}
-                    prefillId={selectedTemplateId}
+                    templateId={selectedTemplateId}
                 // onHabitCreated={fetchHabits}
                 />}
         </div>

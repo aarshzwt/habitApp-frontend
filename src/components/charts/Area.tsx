@@ -85,7 +85,6 @@ export default function Area({
 
    // Optional: Restrict initial visible range
   const end = Math.min(visiblePoints, data.length);
-  console.log(data.length, end)
   const start = 0;
   const optionsWithZoom = {
     ...options,

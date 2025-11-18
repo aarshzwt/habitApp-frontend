@@ -21,7 +21,6 @@ export default function Login() {
                     refreshToken: res.refreshToken
                 })
             );
-            alert(res.message);
             router.push("/");
         } catch (error: any) {
             console.log(error)

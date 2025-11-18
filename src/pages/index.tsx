@@ -17,6 +17,7 @@ import { useSelector } from "react-redux";
 export default function HomePage() {
   const { isLoggedIn, isHydrated } = useSelector((state: any) => state.auth);
   const [user, setUser] = useState();
+  const [fetchUser, setFetchUser] = useState(false);
   const router = useRouter();
   const { isReady } = router;
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function HomePage() {
 
   useEffect(() => {
     getUserDetails();
-  }, [])
+  }, [fetchUser])
 
   async function getUserDetails() {
     try {
@@ -46,11 +47,11 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 p-4 sm:p-8">
+    <div className="container min-h-screen p-4 sm:p-8">
       {user && <Header user={user} />}
 
       <section>
-        <DueToday />
+        <DueToday onChange={() => setFetchUser((prev) => !prev)} />
         {/* <TodayHabits onStatusUpdated={getUserDetails} /> */}
       </section>
       <section className="mb-8">

@@ -1,25 +1,25 @@
+'use client'
 import { useState } from "react";
+import { AuthFormPropsType, FormType } from "./types";
+import { TIMEZONES } from '@/assets/timezons'
+import dynamic from "next/dynamic";
+const SelectField = dynamic(() => import("./SelectField"), { ssr: false });
 
-interface AuthFormPropsType {
-    type: "signup" | "login",
-    onSubmit: (form: FormType) => void
-}
-interface FormType {
-    username: string,
-    email: string,
-    password: string,
-    role: string
-}
 export default function AuthForm({ type, onSubmit }: AuthFormPropsType) {
     const [form, setForm] = useState<FormType>({
         username: "",
         email: "",
         password: "",
+        timezone: "UTC", // auto detect
         role: "user"
     });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleTimezoneChange = (selected: any) => {
+        setForm({ ...form, timezone: selected?.value || "UTC" });
     };
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -68,6 +68,20 @@ export default function AuthForm({ type, onSubmit }: AuthFormPropsType) {
                 required
             />
 
+            {type === "signup" && (
+                <SelectField
+                    name="timezone"
+                    options={TIMEZONES}
+                    value={
+                        TIMEZONES.find(tz => tz.value === form.timezone)
+                    }
+                    onChange={handleTimezoneChange} // ADD ONCHANGE
+                    required
+                    placeholder="Select timezone"
+                    className="z-10 mb-5"
+                />
+            )}
+
             <button
                 type="submit"
                 className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
@@ -75,7 +89,10 @@ export default function AuthForm({ type, onSubmit }: AuthFormPropsType) {
                 {type === "login" ? "Login" : "Sign Up"}
             </button>
 
-            {type === "login" ? <div> Don't have an account yet? <a href="signup">Sign Up</a></div> : <div> Already have an account? <a href="/login">Login</a></div>}
+            {type === "login"
+                ? <div> Don't have an account yet? <a href="signup">Sign Up</a></div>
+                : <div> Already have an account? <a href="/login">Login</a></div>
+            }
         </form>
     );
 }

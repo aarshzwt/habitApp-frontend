@@ -1,14 +1,22 @@
 import type { NextConfig } from "next";
 
+const isDocker = process.env.DOCKER === 'true';
+
 const nextConfig: NextConfig = {
-  /* config options here */
-  reactStrictMode: false,
   async rewrites() {
     return [
       {
         source: '/uploads/image/:path*',
-        destination: 'http://localhost:5000/uploads/image/:path*',
+        destination: isDocker
+          ? 'http://backend:5000/uploads/image/:path*'
+          : 'http://localhost:5000/uploads/image/:path*',
       },
+      // {
+      //   source: '/image/:path*',
+      //   destination: isDocker
+      //     ? 'http://backend:5000/uploads/image/:path*'
+      //     : 'http://localhost:5000/uploads/image/:path*',
+      // },
     ];
   },
 };

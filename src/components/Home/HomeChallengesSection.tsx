@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axiosInstance from "@/utils/axiosInstance";
 import { ChallengeCard } from "../challenges/challengeCard";
+import { Challenge } from "../challenges/types";
 
 export default function HomeChallengesSection() {
     const router = useRouter();
-    const [challenges, setChallenges] = useState([]);
+    const [challenges, setChallenges] = useState<Challenge[]>([]);
 
     useEffect(() => {
-        const getMyChallenges = async () => {
+        const getChallenges = async () => {
             try {
                 const res = await axiosInstance.get("/challenges", {
                     params: {
@@ -24,7 +25,7 @@ export default function HomeChallengesSection() {
             }
         };
 
-        getMyChallenges();
+        getChallenges();
     }, []);
 
     if (!challenges.length) return null;
@@ -44,7 +45,7 @@ export default function HomeChallengesSection() {
 
             <div className="space-y-3">
                 {challenges.map(ch => (
-                    <ChallengeCard key={ch.id} challenge={ch} joined={ch.joined} />
+                    <ChallengeCard key={ch.id} challenge={ch} joined={ch.joined as boolean} />
                 ))}
             </div>
         </div>

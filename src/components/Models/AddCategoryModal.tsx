@@ -1,90 +1,126 @@
 import axiosInstance from "@/utils/axiosInstance";
 import React, { useState } from "react";
+import { AddCategoryModalPropTypes } from "./types";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 
-interface AddCategoryModalPropTypes {
-    onCategoryCreated: (category: categoryType) => void;
-    onClose: () => void;
-}
-interface categoryType {
-    id: number;
-    name: string;
-}
+const schema = Yup.object().shape({
+    name: Yup.string()
+        .required("Category name is required")
+        .max(50, "Max 50 characters"),
+
+    image: Yup.mixed()
+        .nullable()
+        .test("fileSize", "Image must be less than 2MB", (value: any) => {
+            if (!value) return true;
+            return value.size <= 2 * 1024 * 1024;
+        })
+        .test("fileType", "Only JPG/PNG allowed", (value: any) => {
+            if (!value) return true;
+            return ["image/jpeg", "image/jpg", "image/png"].includes(value.type);
+        }),
+});
+
+
 export default function AddCategoryModal({ onClose, onCategoryCreated }: AddCategoryModalPropTypes) {
-    const [formData, setFormData] = useState({
-        name: "",
-        image: null,
-    });
+    const [preview, setPreview] = useState<string | null>(null);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value, files } = e.target;
-        if (name === "categoryImg") {
-            setFormData((prev) => ({ ...prev, image: files[0] || null }));
+    const handleFiles = (files: FileList | null, setFieldValue: any) => {
+
+        if (files && files[0]) {
+            const file = files[0];
+            setPreview(URL.createObjectURL(file));
+            setFieldValue('image', file)
         } else {
-            setFormData((prev) => ({ ...prev, [name]: value }));
+            setPreview(null);
         }
-    };
-
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        try {
-            // Prepare form data for file upload
-            const data = new FormData();
-            data.append("name", formData.name);
-            if (formData.image) {
-                data.append("categoryImg", formData.image);
-            }
-
-            const res = await axiosInstance.post("/category", data, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-            console.log(res)
-
-            onCategoryCreated(res.category); // send to parent
-            onClose();
-        } catch (err) {
-            console.error("Error creating category:", err);
-        }
-    };
+    }
 
     return (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
-            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-                <h2 className="text-xl font-bold mb-4">Add New Category</h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <input
-                        type="text"
-                        name="name"
-                        placeholder="Category Name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className="w-full p-2 border border-gray-300 rounded"
-                        required
-                    />
+        <div
+            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm"
+            onClick={onClose}
+        >
+            <div
+                className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md animate-fade-in"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <h2 className="text-lg font-semibold mb-4 text-gray-800">Add New Category</h2>
 
-                    <input
-                        name="categoryImg"
-                        type="file"
-                        accept="image/png, image/jpeg, image/jpg"
-                        onChange={handleChange}
-                    />
+                <Formik
+                    initialValues={{ name: "", image: null }}
+                    validationSchema={schema}
+                    onSubmit={async (values, { setSubmitting }) => {
+                        try {
+                            const data = new FormData();
+                            data.append("name", values.name);
+                            if (values.image) data.append("categoryImg", values.image);
 
-                    <div className="flex justify-end gap-2">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-                        >
-                            Add
-                        </button>
-                    </div>
-                </form>
+                            const res = await axiosInstance.post("/category", data, {
+                                headers: { "Content-Type": "multipart/form-data" },
+                            });
+
+                            onCategoryCreated(res.category);
+                            onClose();
+                        } catch (err) {
+                            console.error("Error creating category:", err);
+                        } finally {
+                            setSubmitting(false);
+                        }
+                    }}
+                >
+                    {({ setFieldValue, isSubmitting }) => (
+                        <Form className="space-y-4">
+                            <div>
+                                <Field
+                                    name="name"
+                                    placeholder="Category Name"
+                                    className="w-full p-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                                <ErrorMessage name="name" component="p" className="text-red-500 text-sm mt-1" />
+                            </div>
+
+                            <div>
+                                <input
+                                    type="file"
+                                    name="image"
+                                    accept="image/png, image/jpeg, image/jpg"
+                                    onChange={(e) => handleFiles(e.target.files, setFieldValue)}
+                                // onChange={(e) => {
+
+                                // }}
+                                />
+                                <ErrorMessage name="image" component="p" className="text-red-500 text-sm mt-1" />
+
+                                {preview && (
+                                    <img
+                                        src={preview}
+                                        alt="Preview"
+                                        className="mt-3 w-20 h-20 object-cover rounded-lg border"
+                                    />
+                                )}
+                            </div>
+
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                                >
+                                    {isSubmitting ? "Adding..." : "Add"}
+                                </button>
+                            </div>
+                        </Form>
+                    )}
+                </Formik>
             </div>
         </div>
     );

@@ -1,4 +1,4 @@
-FROM node:22-alpine
+FROM node:22
 
 WORKDIR /src
 
@@ -10,4 +10,4 @@ COPY . .
 EXPOSE 3000
 
 # Run Next.js in dev mode (hot reload)
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "docdev"]

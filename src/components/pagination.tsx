@@ -4,19 +4,8 @@ import React, { useMemo } from 'react'
 import ReactPaginate from 'react-paginate'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/utils'
+import { PaginationProps } from './types'
 
-interface PaginationProps {
-  paginationData: paginationDataType
-  onPageChange: (page: number) => void
-  onPageSizeChange: (size: number) => void
-  contentType: string
-}
-interface paginationDataType {
-  page: number
-  totalPages: number
-  itemsPerPage: number
-  total: number
-}
 
 export function Pagination({
   paginationData,

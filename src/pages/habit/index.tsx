@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import axiosInstance from "@/utils/axiosInstance";
 import { useRouter } from "next/router";
 import AddHabitModal from "@/components/Models/AddHabitModal";
-import { Pagination } from "@/components/pagination"; // ✅ import pagination
+import { Pagination } from "@/components/pagination";
+import { paginationDataType } from "@/components/types";
 
 interface Habit {
     id: number;
@@ -12,13 +13,6 @@ interface Habit {
     description: string;
     frequency_type: string;
     frequency_value: number;
-}
-
-interface paginationDataType {
-    page: number;
-    totalPages: number;
-    itemsPerPage: number;
-    total: number;
 }
 
 export default function AllHabits() {
@@ -66,7 +60,7 @@ export default function AllHabits() {
     };
 
     return (
-        <div className="bg-white p-6 rounded-lg shadow-md">
+        <div className="container">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">📋 All Habits</h2>
                 <button
@@ -141,17 +135,14 @@ export default function AllHabits() {
                 />
             )}
 
-            {/* Modals */}
             <AddHabitModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                isOpen={isModalOpen || isEditModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false)
+                    setIsEditModalOpen(false)
+                }}
                 onHabitCreated={fetchHabits}
-            />
-            <AddHabitModal
-                isOpen={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
-                onHabitCreated={fetchHabits}
-                habitId={habitId}
+                habitId={isEditModalOpen ? habitId : undefined}
             />
         </div>
     );
