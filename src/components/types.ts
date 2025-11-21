@@ -54,6 +54,9 @@ export interface TemplatesType {
   categoryName: string;
   description: string;
   title: string;
+  frequency_type: string,
+  frequency_value: null | number,
+  frequency_days: null | number[],
 }
 
 

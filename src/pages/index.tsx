@@ -1,12 +1,8 @@
 // pages/home.js
 
-import AllHabits from "@/components/Home/AllHabits";
-import Badges from "@/components/Home/Badges";
 import DueToday from "@/components/Home/DueToday";
 import Header from "@/components/Home/Header";
 import HomeChallengesSection from "@/components/Home/HomeChallengesSection";
-import Progress from "@/components/Home/Progress";
-import TodayHabits from "@/components/Home/TodayHabits";
 import TemplateList from "@/components/TemplateList";
 import axiosInstance from "@/utils/axiosInstance";
 import { useRouter } from "next/router";
@@ -50,23 +46,17 @@ export default function HomePage() {
     <div className="container min-h-screen p-4 sm:p-8">
       {user && <Header user={user} />}
 
-      <section>
+      <section className="mb-8">
         <DueToday onChange={() => setFetchUser((prev) => !prev)} />
-        {/* <TodayHabits onStatusUpdated={getUserDetails} /> */}
       </section>
+
       <section className="mb-8">
         <HomeChallengesSection />
       </section>
 
-      <section className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* <Progress />
-        <Badges /> */}
+      <section>
         <TemplateList />
       </section>
-
-      {/* <section>
-        <AllHabits />
-      </section> */}
     </div>
   );
 }

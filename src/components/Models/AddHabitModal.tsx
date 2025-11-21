@@ -118,7 +118,7 @@ function AddHabitModal({
         start_date: data.start_date || "",
         end_date: data.end_date || null,
         template: false,
-        showDayPicker: false
+        showDayPicker: data.frequency_type === "x_times_per_week" && (data.frequency_days?.length || 0) > 0,
       });
     } catch (err) {
       console.error("Error fetching template:", err);
