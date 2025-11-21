@@ -43,9 +43,7 @@ export default function DueToday({ onChange }: { onChange: () => void }) {
             const habitRes = await axiosInstance.get('/habitLog/today');
             setHabits(habitRes.habit || []);
 
-        } catch (error) {
-            // toast.error("Couldn't load today's due items");
-            // console.error(error);
+        } catch {
         }
     };
     const fetchDueChallengesToday = async () => {
@@ -53,9 +51,7 @@ export default function DueToday({ onChange }: { onChange: () => void }) {
             const challengeRes = await axiosInstance.get('/challengeLog/user/today');
             setChallenges(challengeRes.challenge || []);
 
-        } catch (error) {
-            // toast.error("Couldn't load today's due items");
-            // console.error(error);
+        } catch {
         }
     };
 
@@ -73,13 +69,13 @@ export default function DueToday({ onChange }: { onChange: () => void }) {
                     : `/challengeLog/${logId}`;
 
             const res = await axiosInstance.patch(endpoint, { status: nextStatus });
-            showSuccessToast(res.message)
+            // showSuccessToast(res.message)
             setRefetch(type)
-            onChange();
+            setTimeout(() => {
+                onChange();
+            }, 200);
 
-        } catch (error) {
-            // toast.error('Failed to update status');
-            // console.error(error);
+        } catch {
         }
     };
 

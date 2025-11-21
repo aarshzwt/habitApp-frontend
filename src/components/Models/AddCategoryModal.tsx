@@ -86,9 +86,6 @@ export default function AddCategoryModal({ onClose, onCategoryCreated }: AddCate
                                     name="image"
                                     accept="image/png, image/jpeg, image/jpg"
                                     onChange={(e) => handleFiles(e.target.files, setFieldValue)}
-                                // onChange={(e) => {
-
-                                // }}
                                 />
                                 <ErrorMessage name="image" component="p" className="text-red-500 text-sm mt-1" />
 

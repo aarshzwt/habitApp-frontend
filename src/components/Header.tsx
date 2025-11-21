@@ -30,6 +30,11 @@ const Header = () => {
             onClick: () => Router.push('/habit')
         },
         {
+            label: 'Explore Habit Templates',
+            icon: <Repeat className="w-4 h-4 text-blue-600" />,
+            onClick: () => Router.push('/templates')
+        },
+        {
             label: 'My Challenges',
             icon: <MapPinPen className="w-4 h-4 text-blue-600" />,
             onClick: () => Router.push('/myChallenges'),

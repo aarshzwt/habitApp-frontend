@@ -11,14 +11,14 @@ export default function TemplateList() {
     const [hasMore, setHasMore] = useState<boolean>(true);
     const [habitModalOpen, setHabitModalOpen] = useState<boolean>(false);
     const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
-    const limit = 6;
+    const [limit, setLimit] = useState<number>(1);
 
     const fetchTemplates = async () => {
         try {
             const res = await axiosInstance.get(`/templates`, {
                 params: { limit, offset }
             });
-            if (res.total < limit) setHasMore(false);
+            if (res.pagination.total <= limit) setHasMore(false);
             setTemplates(res.templates);
         } catch (err) {
             console.error(err);
@@ -66,7 +66,7 @@ export default function TemplateList() {
             {hasMore && (
                 <div className="mt-8 text-center">
                     <button
-                        onClick={() => setOffset((prev) => prev + limit)}
+                        onClick={() => { setOffset((prev) => prev + limit); setLimit((prev) => prev + limit); }}
                         className="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
                     >
                         Show More

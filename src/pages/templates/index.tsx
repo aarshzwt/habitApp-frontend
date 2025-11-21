@@ -18,22 +18,36 @@ export default function TemplateList() {
         total: 0,
     });
 
-    const [filters, setFilters] = useState({
+    const initialFilters = {
         category_id: "",
         frequency_type: "",
         search: "",
-        min_frequency_value: "",
-        max_frequency_value: "",
-    });
+        min_frequency_value: 0,
+        max_frequency_value: 3,
+    };
+
+    const buildFilterParams = (filters: typeof initialFilters) => {
+        const clean: any = {
+            category_id: filters.category_id,
+            frequency_type: filters.frequency_type,
+            search: filters.search,
+        };
+
+        if (["every_x_days", "x_times_per_week"].includes(filters.frequency_type)) {
+            clean.min_frequency_value = filters.min_frequency_value;
+            clean.max_frequency_value = filters.max_frequency_value;
+        }
+
+        return clean;
+    };
+
+    const [filters, setFilters] = useState(initialFilters);
     const [showFilters, setShowFilters] = useState(false);
-    // const [pendingFilters, setPendingFilters] = useState({ ...filters });
 
 
     const fetchTemplates = async (page: number = 1, limit: number = 5, filters: any = null) => {
         console.log(filters)
-        // if (!['x_times_per_week', 'every_x_days'].includes[type]) {
 
-        // }
         try {
             const res = await axiosInstance.get(`/templates`, {
                 params: {
@@ -127,7 +141,7 @@ export default function TemplateList() {
                                         onChange={(e) =>
                                             setFilters(prev => ({
                                                 ...prev,
-                                                min_frequency_value: e.target.value,
+                                                min_frequency_value: Number(e.target.value),
                                             }))
                                         }
                                     />
@@ -142,7 +156,7 @@ export default function TemplateList() {
                                         onChange={(e) =>
                                             setFilters(prev => ({
                                                 ...prev,
-                                                max_frequency_value: e.target.value,
+                                                max_frequency_value: Number(e.target.value),
                                             }))
                                         }
                                     />
@@ -156,10 +170,13 @@ export default function TemplateList() {
                             <button
                                 className="px-4 py-2 bg-gray-200 rounded"
                                 onClick={() => {
+                                    setFilters(initialFilters);
                                     setCurrentPage(1);
-                                    setShowFilters(false);
-                                    fetchTemplates(1, paginationData.itemsPerPage); // manually call API
+                                    const filterParams = buildFilterParams(initialFilters);
+                                    fetchTemplates(1, paginationData.itemsPerPage, filterParams);
                                 }}
+
+                                disabled={JSON.stringify(filters) === JSON.stringify(initialFilters)}
                             >
                                 Reset
                             </button>
@@ -167,12 +184,12 @@ export default function TemplateList() {
                             <button
                                 className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-500"
                                 onClick={() => {
-                                    // console.log(pendingFilters)
-                                    // setFilters(pendingFilters); // apply filters
-                                    fetchTemplates(1, paginationData.itemsPerPage, filters); // manually call API
+                                    const filterParams = buildFilterParams(filters);
+                                    fetchTemplates(1, paginationData.itemsPerPage, filterParams);
                                     setCurrentPage(1);
-                                    setShowFilters(false);
+                                    // setShowFilters(false);
                                 }}
+
                             >
                                 Search
                             </button>
