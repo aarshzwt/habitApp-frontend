@@ -2,7 +2,8 @@ import axiosInstance from "@/utils/axiosInstance";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Participants } from "@/components/challenges/Participants";
-import { Challenge, challengeApiResponse } from "./types";
+import { Challenge } from "../../types/types";
+import { ChallengeStats } from "@/components/challenges/challengeStats";
 
 export default function ChallengeDetailPage() {
     const router = useRouter();
@@ -24,7 +25,11 @@ export default function ChallengeDetailPage() {
 
             <div className="flex gap-4 mt-4 text-sm text-gray-500">
                 <span>Duration: {challenge.duration_days} days</span>
-                <span>Category: {challenge.category?.name || "N/A"}</span>
+                <span>Category: {challenge.category_id || "N/A"}</span>
+            </div>
+
+            <div>
+                <ChallengeStats challengeId={id as string} />
             </div>
 
             <div className="mt-6">

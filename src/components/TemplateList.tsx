@@ -101,7 +101,7 @@ export default function TemplateList() {
 
                                 <button
                                     className="w-full mt-3 py-2 bg-blue-600 text-white rounded-lg 
-                                               shadow hover:bg-blue-700 transition 
+                                               shadow hover:bg-blue-700 cursor-pointer transition 
                                                opacity-0 group-hover:opacity-100"
                                     onClick={() => {
                                         setSelectedTemplateId(t.id);

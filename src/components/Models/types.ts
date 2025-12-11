@@ -17,6 +17,7 @@ export type HabitFormType = {
     end_date: string | null;
     template: boolean;
     showDayPicker: boolean;
+    mode?:string;
 };
 
 export type HabitErrorsType = {

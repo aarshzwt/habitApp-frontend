@@ -4,6 +4,12 @@ import {
     Repeat,
     MapPinPen,
     Trash2,
+    Home,
+    ListChecks,
+    FilePlus2,
+    Flag,
+    Telescope,
+    LogOut,
 } from 'lucide-react'
 import Router, { useRouter } from 'next/router'
 import { Dropdown } from './Dropdown'
@@ -19,40 +25,40 @@ const Header = () => {
     if (router.pathname !== '/') {
         items.push({
             label: 'Home',
-            icon: <Repeat className="w-4 h-4 text-blue-600" />,
+            icon: <Home className="w-4 h-4 text-blue-600" />,
             onClick: () => Router.push('/'),
         })
     }
     items.push(
         {
             label: 'My Habits',
-            icon: <Repeat className="w-4 h-4 text-blue-600" />,
-            onClick: () => Router.push('/habit')
+            icon: <ListChecks className="w-4 h-4 text-blue-600" />,
+            onClick: () => Router.push('/habit'),
         },
         {
             label: 'Explore Habit Templates',
-            icon: <Repeat className="w-4 h-4 text-blue-600" />,
-            onClick: () => Router.push('/templates')
+            icon: <FilePlus2 className="w-4 h-4 text-blue-600" />,
+            onClick: () => Router.push('/templates'),
         },
         {
             label: 'My Challenges',
-            icon: <MapPinPen className="w-4 h-4 text-blue-600" />,
+            icon: <Flag className="w-4 h-4 text-blue-600" />,
             onClick: () => Router.push('/myChallenges'),
         },
         {
             label: 'Explore Challenges',
-            icon: <MapPinPen className="w-4 h-4 text-blue-600" />,
+            icon: <Telescope className="w-4 h-4 text-blue-600" />,
             onClick: () => Router.push('/challenge'),
         }
     )
     if (router.pathname !== '/login' && isLoggedIn) {
         items.push({
             label: 'Logout',
-            icon: <Trash2 className="w-4 h-4 text-red-500" />,
+            icon: <LogOut className="w-4 h-4 text-red-500" />,
             variant: 'danger',
             onClick: () => {
                 dispatch(logout());
-                Router.push('/login')
+                Router.push('/login');
             },
         })
     }

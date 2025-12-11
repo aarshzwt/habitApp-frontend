@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import axiosInstance from '@/utils/axiosInstance';
 import { useRouter } from 'next/navigation';
 import AddHabitModal from '../Models/AddHabitModal';
+import CreateChallengeModal from '../Models/CreateChallengeModal';
 
 const STATUS_COLORS: Record<string, string> = {
     remaining: "bg-yellow-100 text-yellow-800 border border-yellow-300 shadow-sm",
@@ -25,11 +26,27 @@ export default function DueTodayB({ onChange }: { onChange: () => void }) {
     const [challenges, setChallenges] = useState<DueItem[]>([]);
     const [refetch, setRefetch] = useState<"habit" | "challenge" | null>(null);
     const [habitModalOpen, setHabitModalOpen] = useState(false);
+    const [challengeModalOpen, setChallengeModalOpen] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
 
-    useEffect(() => { fetchDueHabits(); fetchDueChallenges(); }, []);
+    useEffect(() => {
+        fetchDueHabits();
+        fetchDueChallenges();
+    }, []);
 
-    const fetchDueHabits = async () => { try { const r = await axiosInstance.get('/habitLog/today'); setHabits(r.habit || []); } catch {} }
-    const fetchDueChallenges = async () => { try { const r = await axiosInstance.get('/challengeLog/user/today'); setChallenges(r.challenge || []); } catch {} }
+    const fetchDueHabits = async () => {
+        try {
+            const r = await axiosInstance.get('/habitLog/today');
+            setHabits(r.habit || []);
+        }
+        catch { }
+    }
+    const fetchDueChallenges = async () => {
+        try {
+            const r = await axiosInstance.get('/challengeLog/user/today');
+            setChallenges(r.challenge || []);
+        } catch { }
+    }
 
     const updateStatus = async (type: "habit" | "challenge", logId: number, currentStatus: keyof typeof STATUS_CYCLE) => {
         const next = STATUS_CYCLE[currentStatus];
@@ -38,12 +55,20 @@ export default function DueTodayB({ onChange }: { onChange: () => void }) {
             await axiosInstance.patch(endpoint, { status: next });
             setRefetch(type);
             setTimeout(() => onChange(), 200);
-        } catch {}
+        } catch { }
     }
 
     useEffect(() => {
-        if (refetch === "habit") { fetchDueHabits(); setRefetch(null); }
-        if (refetch === "challenge") { fetchDueChallenges(); setRefetch(null); }
+        if (refetch === "habit") {
+            fetchDueHabits();
+            setRefetch(null);
+        }
+    }, [refetch]);
+    useEffect(() => {
+        if (refetch === "challenge") {
+            fetchDueChallenges();
+            setRefetch(null);
+        }
     }, [refetch]);
 
     // shared card renderer
@@ -80,7 +105,6 @@ export default function DueTodayB({ onChange }: { onChange: () => void }) {
     return (
         <>
             <div className="grid grid-cols-1 gap-8">
-
                 {/* Modern Top Card */}
                 <div className="p-8 rounded-3xl bg-gradient-to-br from-indigo-100 via-white to-pink-100 
                 border border-white/40 shadow-xl backdrop-blur-md">
@@ -99,47 +123,116 @@ export default function DueTodayB({ onChange }: { onChange: () => void }) {
                             </p>
                         </div>
 
-                        <div className="flex gap-3">
+                        <div className="relative">
                             <button
-                                onClick={() => setHabitModalOpen(true)}
-                                className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-700 transition"
+                                className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-700 transition flex items-center gap-2"
+                                onClick={() => setMenuOpen(!menuOpen)}
                             >
-                                + Add Habit
+                                Quick Actions <span>▾</span>
                             </button>
 
-                            <button
-                                onClick={() => router.push('/habit')}
-                                className="px-4 py-2 rounded-xl bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-medium transition"
-                            >
-                                View Habits
-                            </button>
+                            {menuOpen && (
+                                <div
+                                    className="absolute right-0 mt-3 w-56 rounded-2xl border border-white/40 
+                                    bg-white/60 backdrop-blur-xl shadow-xl p-2 z-20
+                                    animate-fadeIn"
+                                >
+                                    <button
+                                        onClick={() => setHabitModalOpen(true)}
+                                        className="w-full text-left px-4 py-2.5 rounded-xl hover:bg-indigo-50/70 
+                                        transition font-medium text-gray-700"
+                                    >
+                                        + Add Habit
+                                    </button>
+
+                                    <button
+                                        onClick={() => router.push('/habit')}
+                                        className="w-full text-left px-4 py-2.5 rounded-xl hover:bg-indigo-50/70 
+                                        transition font-medium text-gray-700"
+                                    >
+                                        View Habits
+                                    </button>
+
+                                    <hr className="my-2 border-gray-200/60" />
+
+                                    <button
+                                        onClick={() => setChallengeModalOpen(true)}
+                                        className="w-full text-left px-4 py-2.5 rounded-xl hover:bg-pink-50/70 
+                                        transition font-medium text-gray-700"
+                                    >
+                                        + Add Challenge
+                                    </button>
+
+                                    <button
+                                        onClick={() => router.push('/myChallenges')}
+                                        className="w-full text-left px-4 py-2.5 rounded-xl hover:bg-pink-50/70 
+                                        transition font-medium text-gray-700"
+                                    >
+                                        View Challenges
+                                    </button>
+                                </div>
+                            )}
+
                         </div>
+
                     </div>
 
                     {/* Lists */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Habits */}
-                        <div className="p-6 rounded-2xl bg-white/70 shadow-md border border-gray-100 backdrop-blur">
+                        <div className="p-6 rounded-2xl bg-white/70 shadow-md border border-gray-100 backdrop-blur flex flex-col min-h-[260px]">
                             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                                 <span className="text-indigo-600 text-xl">🗓️</span> Habits Due Today
                             </h3>
 
-                            {habits.length === 0
-                                ? <div className="p-6 text-center text-gray-500">Nothing today ✨</div>
-                                : renderList(habits, "habit")
-                            }
+                            {habits.length === 0 ? (
+                                <div className="flex-1 flex flex-col items-center justify-center opacity-90">
+                                    <svg width="100" height="100" viewBox="0 0 24 24" className="mb-3">
+                                        <path
+                                            fill="#D1D5DB"
+                                            d="M21 8l-9-5l-9 5l9 5l9-5zm-9 7l-9-5v6l9 5l9-5v-6l-9 5z"
+                                        />
+                                    </svg>
+
+                                    <h3 className="font-semibold text-center text-gray-700">
+                                        Nothing due Today, Champ! ✨
+                                    </h3>
+
+                                    <p className="text-gray-500 text-sm max-w-sm text-center">
+                                        Enjoy your free time — you’ve earned it!
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="flex-1">{renderList(habits, "habit")}</div>
+                            )}
                         </div>
 
                         {/* Challenges */}
-                        <div className="p-6 rounded-2xl bg-white/70 shadow-md border border-gray-100 backdrop-blur">
+                        <div className="p-6 rounded-2xl bg-white/70 shadow-md border border-gray-100 backdrop-blur flex flex-col min-h-[260px]">
                             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                                 <span className="text-pink-600 text-xl">🏆</span> Challenges Today
                             </h3>
 
-                            {challenges.length === 0
-                                ? <div className="p-6 text-center text-gray-500">No challenges today 🎯</div>
-                                : renderList(challenges, "challenge")
-                            }
+                            {challenges.length === 0 ? (
+                                <div className="flex-1 flex flex-col items-center justify-center opacity-90">
+                                    <svg width="100" height="100" viewBox="0 0 24 24" className="mb-3">
+                                        <path
+                                            fill="#D1D5DB"
+                                            d="M21 8l-9-5l-9 5l9 5l9-5zm-9 7l-9-5v6l9 5l9-5v-6l-9 5z"
+                                        />
+                                    </svg>
+
+                                    <h3 className="font-semibold text-center text-gray-700">
+                                        Nothing due Today, Champ! 🎯
+                                    </h3>
+
+                                    <p className="text-gray-500 text-sm max-w-sm text-center">
+                                        Rest up, Check back Tomorrow!!
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="flex-1">{renderList(challenges, "challenge")}</div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -148,8 +241,17 @@ export default function DueTodayB({ onChange }: { onChange: () => void }) {
             <AddHabitModal
                 isOpen={habitModalOpen}
                 onClose={() => setHabitModalOpen(false)}
-                onHabitCreated={fetchDueHabits}
+                onHabitCreated={() => setRefetch("habit")}
             />
+
+            <CreateChallengeModal
+                isOpen={challengeModalOpen}
+                onClose={() => setChallengeModalOpen(false)}
+                onSuccess={() => setRefetch("challenge")}
+            />
+
+            {/* <CreateChallengeModal
+                isOpen= */}
         </>
     );
 }

@@ -6,12 +6,15 @@ export interface Challenge {
   duration_days: number
   status: 'active' | 'completed' | 'failed' | 'retracted' | 'scheduled'
   joined?: boolean
-  startDate?: string
+  startDate?: string,
+  categoryName?: string
 }
 
 export interface ChallengeCardProps {
   challenge: Challenge
   joined: boolean
+  openJoinModal?: (data: { challengeId: number, duration: number }) => void;
+  openLeaveModal: (data: { challengeId: number }) => void;
 }
 
 
@@ -21,6 +24,8 @@ export interface ChallengeActionsProps {
   joined: boolean
   duration: number
   status: Challenge['status']
+  openJoinModal?: (data: { challengeId: number, duration: number }) => void;
+  openLeaveModal: (data: { challengeId: number }) => void;
 }
 
 
@@ -47,3 +52,37 @@ export interface ParticipantCardPropsType {
   onClick?: () => void;
   expanded?: boolean;
 }
+
+type LeaderboardEntry = {
+  user_id: number;
+  username: string;
+  streak: number;
+  maxStreak: number;
+  completedDays: number;
+  totalDays: number;
+  completionRate: number;
+};
+
+type OverallStats = {
+  totalParticipants: number;
+  avgCompletion: number;
+  avgStreak: number;
+};
+
+type DailyStats = {
+  [date: string]: number; // "YYYY-MM-DD": count
+};
+
+type WeeklyStats = {
+  [weekNumber: string]: {
+    completed: number;
+    total: number;
+  };
+};
+
+export type ChallengeStatsResponse = {
+  leaderboard: LeaderboardEntry[];
+  overall: OverallStats;
+  dailyStats: DailyStats;
+  weeklyStats: WeeklyStats;
+};

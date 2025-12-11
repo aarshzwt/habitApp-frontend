@@ -1,5 +1,3 @@
-// pages/home.js
-
 import DueToday from "@/components/Home/DueToday";
 import Header from "@/components/Home/Header";
 import HomeChallengesSection from "@/components/Home/HomeChallengesSection";
@@ -16,12 +14,6 @@ export default function HomePage() {
   const [fetchUser, setFetchUser] = useState(false);
   const router = useRouter();
   const { isReady } = router;
-  useEffect(() => {
-    if (isHydrated && !isLoggedIn) {
-      router.push("/login");
-      return;
-    }
-  }, [isLoggedIn, isHydrated])
 
   useEffect(() => {
     getUserDetails();
@@ -30,11 +22,10 @@ export default function HomePage() {
   async function getUserDetails() {
     try {
       const userInfo = await axiosInstance.get(`/user`);
-      setUser(userInfo.data)
+      setUser(userInfo?.data)
       // const users = await axiosInstance.get('/user/leaderboard');
       // console.log(users)
     } catch (err) {
-      console.error(err)
     }
   }
 

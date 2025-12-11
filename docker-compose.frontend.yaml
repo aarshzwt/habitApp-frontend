@@ -1,0 +1,13 @@
+services:
+  frontend:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: HabitTracker
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: https://grayce-unvitriolized-rachael.ngrok-free.dev/api/
+      NODE_ENV: production
+      DOCKER: true
+    command: npm run start

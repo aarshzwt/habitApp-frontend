@@ -3,11 +3,12 @@ import 'react-calendar/dist/Calendar.css';
 import { useEffect, useState, useMemo, useCallback } from "react";
 import axiosInstance from "@/utils/axiosInstance";
 import { HabitCalendarProps, Log } from "./types";
-
+import dayjs from "dayjs"
 export default function HabitCalendar({ allLogs, startDate, endDate, onChange, type, clickable = true }: HabitCalendarProps) {
     const [date, setDate] = useState<Date>(new Date());
     const [openIndex, setOpenIndex] = useState<number | null>(null);
     const [selectedLog, setSelectedLog] = useState<Log | null>(null);
+    const currentDate = dayjs().format("YYYY-MM-DD");
 
     useEffect(() => {
         const max = endDate ? new Date(endDate) : null;
@@ -79,7 +80,7 @@ export default function HabitCalendar({ allLogs, startDate, endDate, onChange, t
     const isEditable = useMemo(
         () =>
             selectedLog
-                ? new Date().setDate(new Date().getDate() - 7) <= new Date(selectedLog.date) &&
+                ? new Date(new Date().setDate(new Date().getDate() - 7)) <= new Date(selectedLog.date) &&
                 new Date(selectedLog.date) <= new Date()
                 : false,
         [selectedLog]
@@ -140,27 +141,39 @@ export default function HabitCalendar({ allLogs, startDate, endDate, onChange, t
                             <div className="mt-5 flex justify-end">
                                 <button
                                     className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all
-            ${selectedLog.status === "completed"
-                                            ? "bg-red-500 text-white hover:bg-red-600"
-                                            : selectedLog.status === "missed"
-                                                ? "bg-yellow-500 text-white hover:bg-yellow-600"
+                                         ${selectedLog.date === currentDate
+                                            ? selectedLog.status === "completed"
+                                                ? "bg-red-500 text-white hover:bg-red-600"
+                                                : selectedLog.status === "missed"
+                                                    ? "bg-yellow-500 text-white hover:bg-yellow-600"
+                                                    : "bg-green-400 text-gray-900 hover:bg-green-500"
+                                            : selectedLog.status === "completed"
+                                                ? "bg-red-500 text-white hover:bg-red-600"
                                                 : "bg-green-400 text-gray-900 hover:bg-green-500"
                                         }`}
                                     onClick={() => {
-                                        const nextStatus =
-                                            selectedLog.status === "remaining"
-                                                ? "completed"
-                                                : selectedLog.status === "completed"
-                                                    ? "missed"
-                                                    : "remaining";
+                                        const selectedLogDate = selectedLog.date;
+                                        let nextStatus: "completed" | "missed" | "remaining";
+                                        if (selectedLogDate !== currentDate) {
+                                            nextStatus = selectedLog.status === "completed" ? "missed" : "completed"
+                                        } else {
+                                            nextStatus =
+                                                selectedLog.status === "remaining"
+                                                    ? "completed"
+                                                    : selectedLog.status === "completed"
+                                                        ? "missed"
+                                                        : "remaining";
+                                        }
                                         updateHabitStatus(selectedLog.id, nextStatus);
                                     }}
                                 >
-                                    {selectedLog.status === "completed"
-                                        ? "❌ Mark Missed"
-                                        : selectedLog.status === "missed"
-                                            ? "⏳ Reset to Remaining"
-                                            : "💪 Mark Completed"}
+                                    {selectedLog.date === currentDate
+                                        ? selectedLog.status === "completed"
+                                            ? "❌ Mark Missed"
+                                            : selectedLog.status === "missed"
+                                                ? "⏳ Reset to Remaining"
+                                                : "💪 Mark Completed"
+                                        : selectedLog.status === "completed" ? "❌ Mark Missed" : "💪 Mark Completed"}
                                 </button>
                             </div>
                         )}

@@ -61,6 +61,42 @@ const habitSchema = yup.object().shape({
   end_date: yup.string().nullable(),
 });
 
+const habitUpdateSchema = yup.object().shape({
+  title: yup.string().required("Title is required"),
+  description: yup.string(),
+  frequency_type: yup
+    .string()
+    .oneOf(["daily", "x_times_per_week", "every_x_days"])
+    .required("Frequency type is required"),
+  frequency_value: yup
+    .number()
+    .when('frequency_type', (val, schema) => {
+      if (val[0] === 'every_x_days' || val[0] === 'x_times_per_week') {
+        return schema.required('This field is required for selected frequency').min(2, "atleast 2 days required");
+      }
+      return schema.notRequired();
+    }),
+  frequency_days: yup
+    .array()
+    .of(yup.string())
+    .nullable()
+    .when(['frequency_type', 'frequency_value'], ([type, value], schema) => {
+      if (type === 'x_times_per_week' && typeof value === 'number' && value > 0) {
+        return schema.test(
+          'exact-length-or-null',
+          `Select exactly ${value} day(s) or leave it empty`,
+          function (val) {
+            // Allow null or exact number of selected days
+            return (Array.isArray(val) && (val.length === 0 || val.length === value));
+          }
+        );
+      }
+      return schema.notRequired();
+    }),
+  category_id: yup.number().nullable(),
+  end_date: yup.string().nullable(),
+});
+
 function AddHabitModal({
   isOpen,
   onClose,
@@ -83,6 +119,7 @@ function AddHabitModal({
     end_date: null,
     template: false,
     showDayPicker: false,
+    mode: ""
   });
 
   useEffect(() => {
@@ -119,6 +156,7 @@ function AddHabitModal({
         end_date: data.end_date || null,
         template: false,
         showDayPicker: data.frequency_type === "x_times_per_week" && (data.frequency_days?.length || 0) > 0,
+        mode: ""
       });
     } catch (err) {
       console.error("Error fetching template:", err);
@@ -139,7 +177,7 @@ function AddHabitModal({
         start_date: data.start_date || "",
         end_date: data.end_date || null,
         template: data.template || false,
-        showDayPicker: false,
+        showDayPicker: data.frequency_type === "x_times_per_week" && (data.frequency_days?.length || 0) > 0,
       });
     } catch (err) {
       console.error("Error fetching habit:", err);
@@ -163,8 +201,11 @@ function AddHabitModal({
       <Formik
         enableReinitialize
         initialValues={initialValues}
-        validationSchema={habitSchema}
+        validationSchema={isEditMode ? habitUpdateSchema : habitSchema}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
+          console.log(values)
+          if (isEditMode)
+            values.mode = "edit";
           try {
             if (habitId)
               await axiosInstance.post(`/habit/${habitId}`, values);

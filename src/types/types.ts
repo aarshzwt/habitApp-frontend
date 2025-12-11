@@ -6,7 +6,7 @@ export interface Challenge {
     description: string
     joined?: boolean
     duration_days: number
-    category_id: number | null
+    category_id?: string
     created_by: number
     start_date: string,
     end_date: string,

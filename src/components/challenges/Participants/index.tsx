@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import Router from "next/router";
 import { Participant } from "../types";
 import { ParticipantCard } from "./ParticipantCard";
-import HabitCalendar from "@/components/HabitCalendar"; // ✅ make sure path is correct
+import HabitCalendar from "@/components/HabitCalendar";
 import { ParticipantModal } from "./Participantmodal";
 
 export function Participants({ challengeId }: { challengeId: string }) {
@@ -51,7 +51,7 @@ export function Participants({ challengeId }: { challengeId: string }) {
           {participants.length === 0 ? (
             <p className="text-gray-500">No other participants yet.</p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-4 max-h-[450px] overflow-y-auto pr-1">
+            <div className="py-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-[850px] overflow-y-auto pr-1">
               {participants.map((p) => (
                 <ParticipantCard
                   key={p.user_id}

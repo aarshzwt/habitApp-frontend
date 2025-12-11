@@ -6,9 +6,12 @@ import { ChallengeCard } from "@/components/challenges/challengeCard"
 import { Pagination } from "@/components/pagination"
 import { Loader2 } from "lucide-react"
 import { paginationDataType } from "@/components/types"
-import { challengeApiResponse } from "./challenge/types"
+import { challengeApiResponse } from "../types/types"
 import { Challenge } from "@/components/challenges/types"
 import { useRouter } from "next/router"
+import { JoinChallengeModal } from "@/components/Models/JoinChallengeModal"
+import { LeaveChallengeModal } from "@/components/Models/LeaveChallengeModal"
+import { showSuccessToast } from "@/components/toast"
 
 export default function MyChallengesPage() {
     const router = useRouter();
@@ -30,7 +33,9 @@ export default function MyChallengesPage() {
         itemsPerPage: 5,
         total: 0,
     })
-
+    const [activeModal, setActiveModal] = useState<string | null>(null);
+    const [challengeData, setChallengeData] = useState<{ challengeId: number, duration?: number } | null>(null);
+    const [reload, setReload] = useState(false);
     const [loadingActive, setLoadingActive] = useState(false)
     const [loadingPast, setLoadingPast] = useState(false)
 
@@ -68,10 +73,23 @@ export default function MyChallengesPage() {
         fetchPast(pastPage, pastPagination.itemsPerPage)
     }, [pastPage, pastPagination.itemsPerPage])
 
+    const handleLeave = async () => {
+        if (!challengeData) return;
+        try {
+            await axiosInstance.delete(`/challenges/leave/${challengeData.challengeId}`);
+
+            setActiveModal(null);
+            showSuccessToast('Left challenge 👋')
+            setReload(prev => !prev);
+        } catch { }
+    };
+
     return (
-        <div className="container max-w-4xl mx-auto p-6">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold mb-6">🏆 My Challenges</h2>
+        <div className="container max-w-4xl mx-auto p-7">
+            <div className="flex justify-between items-center mb-8">
+                <h1 className="text-3xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
+                    My Challenges
+                </h1>
                 <button
                     onClick={() => router.push("/challenge")}
                     className="text-blue-600 font-medium hover:underline"
@@ -81,7 +99,7 @@ export default function MyChallengesPage() {
             </div>
             <div className="grid grid-cols-2 gap-8">
                 <div className="flex flex-col px-2">
-                    <h3 className="font-semibold text-gray-800 mb-3">Active Challenges</h3>
+                    <h3 className="font-semibold text-lg text-gray-800 mb-5">Active Challenges</h3>
 
                     {loadingActive && (
                         <div className="flex items-center py-10 text-gray-500">
@@ -92,7 +110,12 @@ export default function MyChallengesPage() {
                     {/* Fixed height list container */}
                     <div className="flex-1 min-h-[400px] flex flex-col gap-4">
                         {!loadingActive && activeChallenges.map(ch => (
-                            <ChallengeCard key={ch.id} challenge={ch} joined={true} />
+                            <ChallengeCard
+                                key={ch.id}
+                                challenge={ch}
+                                joined={true}
+                                openLeaveModal={(data: { challengeId: number }) => { setActiveModal("leave"); setChallengeData(data); }}
+                            />
                         ))}
 
                         {!loadingActive && activeChallenges.length === 0 && (
@@ -117,7 +140,7 @@ export default function MyChallengesPage() {
                 </div>
 
                 <div className="flex flex-col px-2">
-                    <h3 className="font-semibold text-gray-800 mb-3">Past Challenges</h3>
+                    <h3 className="font-semibold text-lg text-gray-800 mb-5">Past Challenges</h3>
 
                     {loadingPast && (
                         <div className="flex items-center py-10 text-gray-500">
@@ -127,7 +150,12 @@ export default function MyChallengesPage() {
 
                     <div className="flex-1 min-h-[400px] flex flex-col gap-4">
                         {!loadingPast && pastChallenges.map(ch => (
-                            <ChallengeCard key={ch.id} challenge={ch} joined={true} />
+                            <ChallengeCard
+                                key={ch.id}
+                                challenge={ch}
+                                joined={true}
+                                openLeaveModal={(data: { challengeId: number }) => { setActiveModal("leave"); setChallengeData(data); }}
+                            />
                         ))}
 
                         {!loadingPast && pastChallenges.length === 0 && (
@@ -150,6 +178,13 @@ export default function MyChallengesPage() {
                     )}
                 </div>
 
+                {activeModal === "leave" && (
+                    <LeaveChallengeModal
+                        isOpen={true}
+                        onClose={() => setActiveModal(null)}
+                        onConfirm={handleLeave}
+                    />
+                )}
             </div>
         </div>
     )

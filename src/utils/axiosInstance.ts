@@ -1,12 +1,16 @@
 import { showErrorToast } from '@/components/toast';
 import axios, { AxiosRequestConfig } from 'axios';
+import Router from 'next/router';
 
 let isRefreshing = false;
 let refreshPromise: Promise<string> | null = null;
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:5000/api/",
-  headers: { "Content-Type": "application/json" }
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  headers: {
+    "Content-Type": "application/json",
+    'ngrok-skip-browser-warning': 'true'
+  }
 });
 
 // Helper to show all validation errors from details array
@@ -55,9 +59,12 @@ axiosInstance.interceptors.response.use(
             isRefreshing = true;
 
             const refreshToken = localStorage.getItem("refreshToken");
-            if (refreshToken) {
+            if (!refreshToken) {
+              Router.push('/login')
+              return;
+            } else {
               refreshPromise = axios
-                .post("http://localhost:5000/api/auth/refresh-token", { refreshToken })
+                .post(`${process.env.NEXT_PUBLIC_API_URL}auth/refresh-token`, { refreshToken })
                 .then((res) => {
                   const newToken = res.data.accessToken;
                   localStorage.setItem("token", newToken);
@@ -74,11 +81,14 @@ axiosInstance.interceptors.response.use(
                 });
             }
           }
-
-          // Wait until refresh is done, then retry original request
-          const newToken = await refreshPromise;
-          originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-          return axiosInstance(originalRequest);
+          if (refreshPromise) {
+            // Wait until refresh is done, then retry original request
+            const newToken = await refreshPromise;
+            originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+            return axiosInstance(originalRequest);
+          } else {
+            Router.push('/login')
+          }
         }
         break
       case 400:
@@ -93,9 +103,6 @@ axiosInstance.interceptors.response.use(
     }
 
     return Promise.reject(error)
-
-
-    return Promise.reject(error);
   }
 );
 

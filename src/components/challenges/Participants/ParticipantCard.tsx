@@ -5,7 +5,7 @@ const statusColors: Record<string, string> = {
     active: "bg-blue-100 text-blue-700",
     completed: "bg-green-100 text-green-700",
     failed: "bg-red-100 text-red-700",
-    pending: "bg-yellow-100 text-yellow-700",
+    scheduled: "bg-yellow-100 text-yellow-700",
 };
 const colors = [
     "bg-red-100 text-red-700",
@@ -34,7 +34,7 @@ export function ParticipantCard({
         >
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-3">
-                    <div className={`h-10 w-10 ${randomColor} rounded-full flex items-center justify-center font-bold`}>
+                    <div className={`h-8 w-8 ${randomColor} rounded-full flex items-center justify-center font-bold`}>
                         {participant.username[0].toUpperCase()}
                     </div>
                     <h4 className="font-semibold text-gray-800 truncate">{participant.username}</h4>
