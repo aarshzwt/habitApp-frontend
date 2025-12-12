@@ -76,7 +76,7 @@ export default function DueTodayB({ onChange }: { onChange: () => void }) {
         <div className="space-y-3">
             {list.map(item => (
                 <div key={item.log_id}
-                    onClick={() => router.push(`/${type === "habit" ? "habit" : "myChallenges"}/${item.id}`)}
+                    onClick={() => router.push(`/${type === "habit" ? "habit" : "challenge"}/${item.id}`)}
                     className="group flex items-center justify-between p-4 bg-white/80 backdrop-blur-md rounded-xl 
                     hover:shadow-xl shadow-sm border border-gray-200 transition-all duration-200 cursor-pointer
                     hover:-translate-y-0.5 hover:bg-white">
